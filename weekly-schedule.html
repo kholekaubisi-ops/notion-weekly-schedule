@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly Schedule — Kholeka & Tshepo</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F6F2;
+    --surface: #FFFFFF;
+    --border: rgba(0,0,0,0.08);
+    --border-strong: rgba(0,0,0,0.14);
+    --text-primary: #1A1A18;
+    --text-secondary: #6B6B65;
+    --text-muted: #A8A8A0;
+
+    --cre: #D4EBF8;
+    --cre-text: #0C3D5C;
+    --cre-border: #8BBFD8;
+
+    --kholeka: #E8E4FC;
+    --kholeka-text: #3B2F8A;
+    --kholeka-border: #A99DE8;
+
+    --both: #D4F0E5;
+    --both-text: #0A4330;
+    --both-border: #6DC9A5;
+
+    --wellness: #FDE8C8;
+    --wellness-text: #6B3608;
+    --wellness-border: #F0A850;
+
+    --edit: #FCE4DC;
+    --edit-text: #7A2510;
+    --edit-border: #E8846A;
+
+    --planning: #ECEAE2;
+    --planning-text: #3D3C38;
+    --planning-border: #B0AEA4;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 40px 32px;
+  }
+
+  .header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 32px;
+  }
+
+  .header-left h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+  }
+
+  .header-left p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+
+  .week-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: right;
+    margin-top: 4px;
+  }
+
+  .legend {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .schedule-wrap {
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .schedule-grid {
+    display: grid;
+    grid-template-columns: 100px repeat(7, 1fr);
+  }
+
+  .col-header {
+    padding: 14px 10px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  .col-header:first-child {
+    text-align: left;
+    padding-left: 18px;
+    color: var(--text-muted);
+    font-size: 11px;
+  }
+
+  .col-header.today {
+    color: var(--text-primary);
+    position: relative;
+  }
+
+  .col-header.today::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 2px;
+    background: var(--text-primary);
+    border-radius: 2px;
+  }
+
+  .time-label {
+    padding: 18px 18px 0;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    border-right: 1px solid var(--border);
+  }
+
+  .time-label .time-range {
+    font-size: 10px;
+    color: var(--text-muted);
+    opacity: 0.7;
+    font-style: italic;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    margin-top: 2px;
+  }
+
+  .row {
+    display: contents;
+  }
+
+  .row-cells {
+    display: contents;
+  }
+
+  .row > .time-label,
+  .row > .cell {
+    border-top: 1px solid var(--border);
+  }
+
+  .cell {
+    padding: 10px 8px;
+    min-height: 90px;
+    border-left: 1px solid var(--border);
+    display: flex;
+    align-items: stretch;
+  }
+
+  .cell:last-child {
+    border-right: none;
+  }
+
+  .block {
+    border-radius: 8px;
+    padding: 9px 10px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border: 1px solid transparent;
+    transition: transform 0.1s, box-shadow 0.1s;
+    cursor: default;
+  }
+
+  .block:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+
+  .block.cre { background: var(--cre); border-color: var(--cre-border); }
+  .block.kholeka { background: var(--kholeka); border-color: var(--kholeka-border); }
+  .block.both { background: var(--both); border-color: var(--both-border); }
+  .block.wellness { background: var(--wellness); border-color: var(--wellness-border); }
+  .block.edit { background: var(--edit); border-color: var(--edit-border); }
+  .block.planning { background: var(--planning); border-color: var(--planning-border); }
+  .block.empty { background: transparent; border-color: transparent; cursor: default; }
+  .block.empty:hover { transform: none; box-shadow: none; }
+
+  .block-label {
+    font-size: 11.5px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .block.cre .block-label { color: var(--cre-text); }
+  .block.kholeka .block-label { color: var(--kholeka-text); }
+  .block.both .block-label { color: var(--both-text); }
+  .block.wellness .block-label { color: var(--wellness-text); }
+  .block.edit .block-label { color: var(--edit-text); }
+  .block.planning .block-label { color: var(--planning-text); }
+
+  .block-sub {
+    font-size: 10.5px;
+    font-weight: 400;
+    line-height: 1.35;
+    opacity: 0.75;
+  }
+
+  .block.cre .block-sub { color: var(--cre-text); }
+  .block.kholeka .block-sub { color: var(--kholeka-text); }
+  .block.both .block-sub { color: var(--both-text); }
+  .block.wellness .block-sub { color: var(--wellness-text); }
+  .block.edit .block-sub { color: var(--edit-text); }
+  .block.planning .block-sub { color: var(--planning-text); }
+
+  .edit-highlight .time-label {
+    background: #FFF8F6;
+  }
+
+  .edit-highlight > .cell {
+    background: #FFFAF8;
+  }
+
+  .footer {
+    margin-top: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-note {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  .footer-note strong {
+    color: var(--edit-text);
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  .total-edit {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 12px;
+  }
+
+  .total-edit span {
+    color: var(--edit-text);
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Weekly schedule</h1>
+    <p>Kholeka & Tshepo — brand operating system</p>
+  </div>
+  <div class="week-label" id="week-label"></div>
+</div>
+
+<div class="legend">
+  <div class="legend-item">
+    <div class="legend-dot" style="background:var(--cre);border:1px solid var(--cre-border);"></div>
+    CRE / Tshepo brand
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:var(--kholeka);border:1px solid var(--kholeka-border);"></div>
+    Kholeka brand
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:var(--both);border:1px solid var(--both-border);"></div>
+    Both brands
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:var(--wellness);border:1px solid var(--wellness-border);"></div>
+    Wellness
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:var(--edit);border:1px solid var(--edit-border);"></div>
+    Edit window (10pm–12am)
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:var(--planning);border:1px solid var(--planning-border);"></div>
+    Planning / life
+  </div>
+</div>
+
+<div class="schedule-wrap">
+  <div class="schedule-grid">
+
+    <!-- Header row -->
+    <div class="col-header"></div>
+    <div class="col-header" id="day-0">Mon</div>
+    <div class="col-header" id="day-1">Tue</div>
+    <div class="col-header" id="day-2">Wed</div>
+    <div class="col-header" id="day-3">Thu</div>
+    <div class="col-header" id="day-4">Fri</div>
+    <div class="col-header" id="day-5">Sat</div>
+    <div class="col-header" id="day-6">Sun</div>
+
+    <!-- Morning row -->
+    <div class="time-label row" style="border-top:1px solid var(--border);">
+      Morning
+      <span class="time-range">5am – 9am</span>
+    </div>
+    <div class="cell"><div class="block wellness"><div class="block-label">Gym</div><div class="block-sub">Session + log</div></div></div>
+    <div class="cell"><div class="block wellness"><div class="block-label">Gym</div><div class="block-sub">Session + log</div></div></div>
+    <div class="cell"><div class="block wellness"><div class="block-label">Rest day</div><div class="block-sub">Recovery walk</div></div></div>
+    <div class="cell"><div class="block wellness"><div class="block-label">Gym</div><div class="block-sub">Session + log</div></div></div>
+    <div class="cell"><div class="block wellness"><div class="block-label">Gym</div><div class="block-sub">Session + log</div></div></div>
+    <div class="cell"><div class="block wellness"><div class="block-label">Gym</div><div class="block-sub">Weekend session</div></div></div>
+    <div class="cell"><div class="block planning"><div class="block-label">Weekly review</div><div class="block-sub">Plan + reflect</div></div></div>
+
+    <!-- Day row -->
+    <div class="time-label row" style="border-top:1px solid var(--border);">
+      Day
+      <span class="time-range">9am – 6pm</span>
+    </div>
+    <div class="cell"><div class="block cre"><div class="block-label">CRE admin</div><div class="block-sub">Listings + files</div></div></div>
+    <div class="cell"><div class="block cre"><div class="block-label">Prospecting</div><div class="block-sub">Outreach + calls</div></div></div>
+    <div class="cell"><div class="block cre"><div class="block-label">Site visits</div><div class="block-sub">Shoots + viewings</div></div></div>
+    <div class="cell"><div class="block cre"><div class="block-label">CRE filming</div><div class="block-sub">Content capture</div></div></div>
+    <div class="cell"><div class="block cre"><div class="block-label">LinkedIn</div><div class="block-sub">Draft + schedule</div></div></div>
+    <div class="cell"><div class="block both"><div class="block-label">Batch filming</div><div class="block-sub">Both brands</div></div></div>
+    <div class="cell"><div class="block planning"><div class="block-label">Life goals</div><div class="block-sub">Vision + review</div></div></div>
+
+    <!-- Evening row -->
+    <div class="time-label row" style="border-top:1px solid var(--border);">
+      Evening
+      <span class="time-range">6pm – 10pm</span>
+    </div>
+    <div class="cell"><div class="block kholeka"><div class="block-label">Brand strategy</div><div class="block-sub">Content direction</div></div></div>
+    <div class="cell"><div class="block kholeka"><div class="block-label">IG planning</div><div class="block-sub">Captions + ideas</div></div></div>
+    <div class="cell"><div class="block kholeka"><div class="block-label">YouTube plan</div><div class="block-sub">Script + structure</div></div></div>
+    <div class="cell"><div class="block both"><div class="block-label">Caption writing</div><div class="block-sub">Both brands</div></div></div>
+    <div class="cell"><div class="block kholeka"><div class="block-label">Post + engage</div><div class="block-sub">Go live + replies</div></div></div>
+    <div class="cell"><div class="block both"><div class="block-label">Post both brands</div><div class="block-sub">Schedule week</div></div></div>
+    <div class="cell"><div class="block planning"><div class="block-label">Rest</div><div class="block-sub">Recharge</div></div></div>
+
+    <!-- Edit window row -->
+    <div class="time-label edit-highlight row" style="border-top:1px solid var(--border);">
+      Edit window
+      <span class="time-range">10pm – 12am</span>
+    </div>
+    <div class="cell edit-highlight"><div class="block edit"><div class="block-label">Edit: Tshepo CRE</div><div class="block-sub">Listing photos</div></div></div>
+    <div class="cell edit-highlight"><div class="block edit"><div class="block-label">Edit: Kholeka IG</div><div class="block-sub">Reel export</div></div></div>
+    <div class="cell edit-highlight"><div class="block edit"><div class="block-label">Edit: YouTube BTS</div><div class="block-sub">Rough cut</div></div></div>
+    <div class="cell edit-highlight"><div class="block edit"><div class="block-label">Edit: lifestyle</div><div class="block-sub">Gym reel</div></div></div>
+    <div class="cell edit-highlight"><div class="block edit"><div class="block-label">Queue + schedule</div><div class="block-sub">Week ahead</div></div></div>
+    <div class="cell edit-highlight"><div class="block empty"></div></div>
+    <div class="cell edit-highlight"><div class="block empty"></div></div>
+
+  </div>
+</div>
+
+<div class="footer">
+  <div class="footer-note">Edit window runs <strong>Mon – Fri, 10pm to midnight</strong> — your protected creative block.</div>
+  <div class="total-edit">Weekly edit load: <span>~9 hours</span></div>
+</div>
+
+<script>
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const today = new Date().getDay();
+  const notionDayMap = [6, 0, 1, 2, 3, 4, 5];
+  const todayCol = notionDayMap[today];
+  if (todayCol >= 0 && todayCol <= 6) {
+    document.getElementById('day-' + todayCol).classList.add('today');
+  }
+
+  const now = new Date();
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 6);
+  const fmt = d => d.toLocaleDateString('en-ZA', { day: 'numeric', month: 'short' });
+  document.getElementById('week-label').textContent = `Week of ${fmt(startOfWeek)} – ${fmt(endOfWeek)}`;
+</script>
+
+</body>
+</html>
